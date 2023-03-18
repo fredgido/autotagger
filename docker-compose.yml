@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        MODEL: "swin"
+
+    #command: sleep infinity
+    env_file:
+      - .env
+    volumes:
+      - .:/project
+    ports:
+      - ${WEB_PORT:-8000}:8000

@@ -1,17 +1,19 @@
+import os
 from distutils.util import strtobool
-from os import getenv
 
 wsgi_app = "app:app"
-bind = getenv("GUNICORN_BIND", "0.0.0.0:5000")
-workers = int(getenv("GUNICORN_WORKERS", 1))
-threads = int(getenv("GUNICORN_THREADS", 4))
-accesslog = getenv("GUNICORN_ACCESSLOG", "-")
-errorlog = getenv("GUNICORN_ERRORLOG", "-")
-loglevel = getenv("GUNICORN_LOGLEVEL", "info")
-access_log_format = getenv(
+bind = os.getenv("GUNICORN_BIND", f"0.0.0.0:{os.getenv('GUNICORN_WORKERS', 8000)}")
+timeout = int(os.getenv("GUNICORN_TIMEOUT", 120))
+keep_alive = int(os.getenv("GUNICORN_KEEPALIVE", timeout))
+workers = int(os.getenv("GUNICORN_WORKERS", 1))
+threads = int(os.getenv("GUNICORN_THREADS", 4))
+accesslog = os.getenv("GUNICORN_ACCESSLOG", "-")
+errorlog = os.getenv("GUNICORN_ERRORLOG", "-")
+loglevel = os.getenv("GUNICORN_LOGLEVEL", "info")
+access_log_format = os.getenv(
     "GUNICORN_ACCESS_LOG_FORMAT",
     '{"time":"%(t)s","id":"%({X-Request-Id}i)s","ip":"%(h)s","method":"%(m)s","url":"%(U)s","status":"%(s)s","contentType":"%(Content-Type)s","userAgent":"%(a)s","referer":"%(f)s","sent":"%(B)s","duration":"%(D)s"}',
 )
-preload_app = bool(strtobool(getenv("GUNICORN_PRELOAD", "True")))
-max_requests = int(getenv("GUNICORN_MAX_REQUESTS", 0))
-max_requests_jitter = int(getenv("GUNICORN_MAX_REQUESTS_JITTER", 0))
+preload_app = bool(strtobool(os.getenv("GUNICORN_PRELOAD", "False")))
+max_requests = int(os.getenv("GUNICORN_MAX_REQUESTS", 1000))
+max_requests_jitter = int(os.getenv("GUNICORN_MAX_REQUESTS_JITTER", 100))

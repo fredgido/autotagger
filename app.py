@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
+import os
 from base64 import b64encode
-from os import getenv
 
 import PIL.Image
 from dotenv import load_dotenv
@@ -10,7 +10,7 @@ from flask import Flask, request, render_template, jsonify, abort
 from autotagger import Autotagger
 
 load_dotenv()
-model_path = getenv("MODEL_PATH", "models/model.onnx")
+model_path = os.getenv("MODEL_PATH", "models/model.onnx")
 autotagger = Autotagger(model_path)
 
 app = Flask(__name__)
@@ -48,3 +48,7 @@ def evaluate():
         return jsonify(predictions)
     else:
         abort(400)
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT") or 8000), debug=os.getenv("DEBUG") == "True")
