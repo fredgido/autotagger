@@ -1,3 +1,5 @@
+from typing import Generator
+
 import PIL.Image
 import cv2
 import numpy as np
@@ -55,7 +57,13 @@ class Autotagger:
         self.general_indices = list(np.where(df["category"] == 0)[0])
         self.character_indices = list(np.where(df["category"] == 4)[0])
 
-    def predict(self, images, general_threshold=0.35, character_threshold=0.8, limit=50):
+    def predict(
+        self,
+        images: list[PIL.Image],
+        general_threshold: float = 0.01,
+        character_threshold: float = 0.8,
+        limit: int = 100,
+    ) -> Generator[dict[str, float], None, None]:
         inputs = self.model.get_inputs()[0]
         _, height, width, _ = inputs.shape
         input_name = inputs.name
@@ -63,7 +71,6 @@ class Autotagger:
 
         filenames = [image.filename for image in images]
         images = [process_image(image, height, width) for image in images]
-        results = []
 
         for filename, image in zip(filenames, images):
             probs = self.model.run([label_name], {input_name: image})[0]

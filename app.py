@@ -6,6 +6,7 @@ from base64 import b64encode
 import PIL.Image
 from dotenv import load_dotenv
 from flask import Flask, request, render_template, jsonify, abort
+from werkzeug.datastructures import FileStorage
 
 from autotagger import Autotagger
 
@@ -25,29 +26,31 @@ def index():
 
 @app.route("/evaluate", methods=["POST"])
 def evaluate():
-    files = request.files.getlist("file")
+    files: list[FileStorage] = request.files.getlist("file")
     threshold = float(request.values.get("threshold", 0.1))
     general_threshold = float(request.values.get("general_threshold", threshold))
     character_threshold = float(request.values.get("character_threshold", threshold))
-    output = request.values.get("format", "html")
-    limit = int(request.values.get("limit", 50))
+    output: str = request.values.get("format", "json")
+    limit = int(request.values.get("limit", 100))
 
-    images = [PIL.Image.open(file) for file in files]
     predictions = autotagger.predict(
-        images, general_threshold=threshold, character_threshold=character_threshold, limit=limit
+        [PIL.Image.open(file.stream) for file in files],
+        general_threshold=general_threshold,
+        character_threshold=character_threshold,
+        limit=limit,
     )
 
     if output == "html":
         for file in files:
             file.seek(0)
 
-        base64data = [b64encode(file.read()).decode() for file in files]
-        return render_template("evaluate.html", predictions=zip(base64data, predictions))
+        files_in_base64 = [b64encode(file.read()).decode() for file in files]
+        return render_template("evaluate.html", predictions=zip(files_in_base64, predictions))
     elif output == "json":
         predictions = [{"filename": file.filename, "tags": tags} for file, tags in zip(files, predictions)]
         return jsonify(predictions)
     else:
-        abort(400)
+        abort(400, description="Invalid output type")
 
 
 if __name__ == "__main__":
