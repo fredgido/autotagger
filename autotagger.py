@@ -52,7 +52,7 @@ class Autotagger:
         self.model = rt.InferenceSession(model_path)
 
         df = pd.read_csv(tags_path)
-        self.tag_names = df["name"].tolist()
+        self.tag_names = [(label[0:8] if label.startswith("rating:") else label) for label in df["name"].tolist()]
         self.rating_indices = list(np.where(df["category"] == 9)[0])
         self.general_indices = list(np.where(df["category"] == 0)[0])
         self.character_indices = list(np.where(df["category"] == 4)[0])
