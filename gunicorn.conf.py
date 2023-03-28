@@ -2,7 +2,7 @@ import os
 from distutils.util import strtobool
 
 wsgi_app = "app:app"
-bind = os.getenv("GUNICORN_BIND", f"0.0.0.0:{os.getenv('GUNICORN_WORKERS', 8000)}")
+bind = os.getenv("GUNICORN_BIND", f"0.0.0.0:{os.getenv('INTERNAL_PORT', 8000)}")
 timeout = int(os.getenv("GUNICORN_TIMEOUT", 120))
 keep_alive = int(os.getenv("GUNICORN_KEEPALIVE", timeout))
 workers = int(os.getenv("GUNICORN_WORKERS", 1))
